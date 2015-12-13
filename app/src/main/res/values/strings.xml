@@ -1,0 +1,30 @@
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="TypographyDashes">
+
+  <string name="app_name">Vinli Net Demo</string>
+
+  <string name="app_client_id">1dbac1be-0092-4d9f-b80e-b69469dc622a</string>
+  <string name="app_redirect_uri">https://android.netdemo.vin.li</string>
+
+  <string name="first_name">First Name</string>
+  <string name="last_name">Last Name</string>
+  <string name="email">Email</string>
+  <string name="phone">Phone</string>
+
+  <string name="device_name">Device Name</string>
+  <string name="first_device">First Device</string>
+  <string name="latest_vehicle">Latest Vehicle</string>
+  <string name="latest_location">Latest Location</string>
+
+  <string name="error_fmt">%s : Error</string>
+  <string name="success_fmt">%1$s : %2$s</string>
+  <string name="none">None</string>
+  <string name="unnamed_vehicle">Unnamed Vehicle</string>
+  <string name="waiting_fmt">%s : --</string>
+
+  <string name="sign_out">Sign Out</string>
+  <string name="refresh">Refresh</string>
+
+  <string name="error_getting_devices">Error getting devices.</string>
+
+</resources>
