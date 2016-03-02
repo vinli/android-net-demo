@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -17,6 +18,8 @@ import butterknife.OnClick;
 import li.vin.net.Device;
 import li.vin.net.Location;
 import li.vin.net.Page;
+import li.vin.net.StreamMessage;
+import li.vin.net.StreamMessage.DataType;
 import li.vin.net.User;
 import li.vin.net.Vehicle;
 import li.vin.net.Vinli;
@@ -207,7 +210,7 @@ public class NetDemoActivity extends AppCompatActivity {
           }
 
           @Override
-          public void onNext(Device device) {
+          public void onNext(final Device device) {
             // Inflate device layout into device container. See above note about how using an
             // AdapterView would be better if this weren't just a naive example.
             View v = LayoutInflater.from(NetDemoActivity.this)
@@ -216,6 +219,127 @@ public class NetDemoActivity extends AppCompatActivity {
             TextView latestVehicle = (TextView) v.findViewById(R.id.latest_vehicle);
             TextView latestLocation = (TextView) v.findViewById(R.id.latest_location);
             deviceContainer.addView(v);
+
+            ConnectableObservable<StreamMessage> stream = device.stream().publish();
+
+            subscription.add(stream //
+                .flatMap(StreamMessage.onlyWithIntVal(DataType.RPM)) //
+                .observeOn(AndroidSchedulers.mainThread()) //
+                .subscribe(new Subscriber<Integer>() {
+                  @Override
+                  public void onCompleted() {
+
+                  }
+
+                  @Override
+                  public void onError(Throwable e) {
+
+                  }
+
+                  @Override
+                  public void onNext(Integer rpm) {
+                    Log.e("TESTO", "stream RPM for " + device.name() + " : " + rpm);
+                  }
+                }));
+
+            subscription.add(stream //
+                .flatMap(StreamMessage.onlyWithIntVal(DataType.VEHICLE_SPEED)) //
+                .observeOn(AndroidSchedulers.mainThread()) //
+                .subscribe(new Subscriber<Integer>() {
+                  @Override
+                  public void onCompleted() {
+
+                  }
+
+                  @Override
+                  public void onError(Throwable e) {
+
+                  }
+
+                  @Override
+                  public void onNext(Integer vss) {
+                    Log.e("TESTO", "stream VSS for " + device.name() + " : " + vss);
+                  }
+                }));
+
+            subscription.add(stream //
+                .flatMap(StreamMessage.onlyWithFloatVal(DataType.MASS_AIRFLOW)) //
+                .observeOn(AndroidSchedulers.mainThread()) //
+                .subscribe(new Subscriber<Float>() {
+                  @Override
+                  public void onCompleted() {
+
+                  }
+
+                  @Override
+                  public void onError(Throwable e) {
+
+                  }
+
+                  @Override
+                  public void onNext(Float maf) {
+                    Log.e("TESTO", "stream MAF for " + device.name() + " : " + maf);
+                  }
+                }));
+
+            subscription.add(stream //
+                .flatMap(StreamMessage.onlyWithFloatVal(DataType.CALCULATED_ENGINE_LOAD)) //
+                .observeOn(AndroidSchedulers.mainThread()) //
+                .subscribe(new Subscriber<Float>() {
+                  @Override
+                  public void onCompleted() {
+
+                  }
+
+                  @Override
+                  public void onError(Throwable e) {
+
+                  }
+
+                  @Override
+                  public void onNext(Float load) {
+                    Log.e("TESTO", "stream load% for " + device.name() + " : " + load);
+                  }
+                }));
+
+            stream.connect();
+
+            //subscription.add(device.stream()
+            //    .observeOn(AndroidSchedulers.mainThread())
+            //    .subscribe(new Subscriber<StreamMessage>() {
+            //      @Override
+            //      public void onCompleted() {
+            //        Log.e("TESTO", "stream onCompleted for " + device.name());
+            //      }
+            //
+            //      @Override
+            //      public void onError(Throwable e) {
+            //        Log.e("TESTO", "stream onError for " + device.name(), e);
+            //      }
+            //
+            //      @Override
+            //      public void onNext(StreamMessage message) {
+            //        Log.e("TESTO", "stream onNext for " + device.name() + "------------------");
+            //        Log.e("TESTO", "---------------------------------------------------------");
+            //
+            //        int rpm = message.intVal(StreamMessage.DataType.RPM, -1);
+            //        if (rpm != -1) Log.e("TESTO", device.name() + " RPM: " + rpm);
+            //
+            //        int vss = message.intVal(StreamMessage.DataType.VEHICLE_SPEED, -1);
+            //        if (vss != -1) Log.e("TESTO", device.name() + " VSS: " + vss);
+            //
+            //        Coordinate coord = message.coord();
+            //        if (coord != null) Log.e("TESTO", device.name() + " coord: " + coord);
+            //
+            //        StreamMessage.AccelData accel = message.accel();
+            //        if (accel != null) Log.e("TESTO", device.name() + " accel: " + accel);
+            //
+            //        String fss = message.rawVal("fuelSystemStatus");
+            //        if (fss != null) Log.e("TESTO", device.name() + " fuelSystemStatus: " + fss);
+            //
+            //        Log.e("TESTO", "---------------------------------------------------------");
+            //      }
+            //    }));
 
             // Bind device name.
             subscribeToData(Observable.just(device.name()), deviceName,
