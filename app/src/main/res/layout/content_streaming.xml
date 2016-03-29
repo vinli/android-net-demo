@@ -38,21 +38,25 @@
 
             <TextView
                 android:id="@+id/rpm"
+                android:text="@string/rpm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/vehicle_speed"
+                android:text="@string/vehicle_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/mass_air_flow"
+                android:text="@string/mass_air_flow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/calculated_load_value"
+                android:text="@string/calculated_load_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 

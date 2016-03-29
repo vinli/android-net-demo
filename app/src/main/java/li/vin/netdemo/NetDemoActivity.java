@@ -222,8 +222,6 @@ public class NetDemoActivity extends AppCompatActivity {
             Button startStreamingButtion = (Button) v.findViewById(R.id.start_streaming_button);
             deviceContainer.addView(v);
 
-            ConnectableObservable<StreamMessage> stream = device.stream().publish();
-
             startStreamingButtion.setTag(device);
             startStreamingButtion.setOnClickListener(new View.OnClickListener() {
               @Override
@@ -232,88 +230,6 @@ public class NetDemoActivity extends AppCompatActivity {
                 startStreamingActivity((Device) streamButton.getTag());
               }
             });
-
-            subscription.add(stream //
-                .flatMap(StreamMessage.onlyWithIntVal(DataType.RPM)) //
-                .observeOn(AndroidSchedulers.mainThread()) //
-                .subscribe(new Subscriber<Integer>() {
-                  @Override
-                  public void onCompleted() {
-
-                  }
-
-                  @Override
-                  public void onError(Throwable e) {
-
-                  }
-
-                  @Override
-                  public void onNext(Integer rpm) {
-                    Log.e("TESTO", "stream RPM for " + device.name() + " : " + rpm);
-                  }
-                }));
-
-            subscription.add(stream //
-                .flatMap(StreamMessage.onlyWithIntVal(DataType.VEHICLE_SPEED)) //
-                .observeOn(AndroidSchedulers.mainThread()) //
-                .subscribe(new Subscriber<Integer>() {
-                  @Override
-                  public void onCompleted() {
-
-                  }
-
-                  @Override
-                  public void onError(Throwable e) {
-
-                  }
-
-                  @Override
-                  public void onNext(Integer vss) {
-                    Log.e("TESTO", "stream VSS for " + device.name() + " : " + vss);
-                  }
-                }));
-
-            subscription.add(stream //
-                .flatMap(StreamMessage.onlyWithFloatVal(DataType.MASS_AIRFLOW)) //
-                .observeOn(AndroidSchedulers.mainThread()) //
-                .subscribe(new Subscriber<Float>() {
-                  @Override
-                  public void onCompleted() {
-
-                  }
-
-                  @Override
-                  public void onError(Throwable e) {
-
-                  }
-
-                  @Override
-                  public void onNext(Float maf) {
-                    Log.e("TESTO", "stream MAF for " + device.name() + " : " + maf);
-                  }
-                }));
-
-            subscription.add(stream //
-                .flatMap(StreamMessage.onlyWithFloatVal(DataType.CALCULATED_ENGINE_LOAD)) //
-                .observeOn(AndroidSchedulers.mainThread()) //
-                .subscribe(new Subscriber<Float>() {
-                  @Override
-                  public void onCompleted() {
-
-                  }
-
-                  @Override
-                  public void onError(Throwable e) {
-
-                  }
-
-                  @Override
-                  public void onNext(Float load) {
-                    Log.e("TESTO", "stream load% for " + device.name() + " : " + load);
-                  }
-                }));
-
-            stream.connect();
 
             //subscription.add(device.stream()
             //    .observeOn(AndroidSchedulers.mainThread())

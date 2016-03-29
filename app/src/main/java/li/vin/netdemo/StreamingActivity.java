@@ -82,13 +82,13 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
 
                     @Override
                     public void onError(Throwable e) {
-                        rpmTextView.setText(String.format(getString(R.string.error_fmt), DataType.RPM));
+                        rpmTextView.setText(String.format(getString(R.string.error_fmt), getString(R.string.rpm)));
                     }
 
                     @Override
                     public void onNext(Integer rpm) {
                         Log.e("TESTO", "stream RPM for " + device.name() + " : " + rpm);
-                        rpmTextView.setText(String.format(getString(R.string.success_fmt), DataType.RPM, rpm));
+                        rpmTextView.setText(String.format(getString(R.string.success_fmt), getString(R.string.rpm), rpm));
                     }
                 }));
 
@@ -103,13 +103,13 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
 
                     @Override
                     public void onError(Throwable e) {
-                        vehicleSpeedTextView.setText(String.format(getString(R.string.error_fmt), DataType.VEHICLE_SPEED));
+                        vehicleSpeedTextView.setText(String.format(getString(R.string.error_fmt), getString(R.string.vehicle_speed)));
                     }
 
                     @Override
                     public void onNext(Integer vss) {
                         Log.e("TESTO", "stream VSS for " + device.name() + " : " + vss);
-                        vehicleSpeedTextView.setText(String.format(getString(R.string.success_fmt), DataType.VEHICLE_SPEED, vss));
+                        vehicleSpeedTextView.setText(String.format(getString(R.string.success_fmt), getString(R.string.vehicle_speed), vss));
                     }
                 }));
 
@@ -124,13 +124,13 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
 
                     @Override
                     public void onError(Throwable e) {
-                        massAirFlowTextView.setText(String.format(getString(R.string.error_fmt), DataType.MASS_AIRFLOW));
+                        massAirFlowTextView.setText(String.format(getString(R.string.error_fmt), getString(R.string.mass_air_flow)));
                     }
 
                     @Override
                     public void onNext(Float maf) {
                         Log.e("TESTO", "stream MAF for " + device.name() + " : " + maf);
-                        massAirFlowTextView.setText(String.format(getString(R.string.success_fmt), DataType.MASS_AIRFLOW, maf));
+                        massAirFlowTextView.setText(String.format(getString(R.string.success_fmt), getString(R.string.mass_air_flow), maf));
                     }
                 }));
 
@@ -145,13 +145,13 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
 
                     @Override
                     public void onError(Throwable e) {
-                        calculatedLoadValueTextView.setText(String.format(getString(R.string.error_fmt), DataType.CALCULATED_ENGINE_LOAD));
+                        calculatedLoadValueTextView.setText(String.format(getString(R.string.error_fmt), getString(R.string.calculated_load_value)));
                     }
 
                     @Override
                     public void onNext(Float load) {
                         Log.e("TESTO", "stream load% for " + device.name() + " : " + load);
-                        calculatedLoadValueTextView.setText(String.format(getString(R.string.success_fmt), DataType.CALCULATED_ENGINE_LOAD, load));
+                        calculatedLoadValueTextView.setText(String.format(getString(R.string.success_fmt), getString(R.string.calculated_load_value), load));
                     }
                 }));
 

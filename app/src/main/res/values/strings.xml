@@ -16,6 +16,11 @@
   <string name="latest_location">Latest Location</string>
   <string name="start_streaming">Start Streaming</string>
 
+  <string name="rpm">RPM</string>
+  <string name="vehicle_speed">Vehicle Speed</string>
+  <string name="mass_air_flow">Mass Air Flow</string>
+  <string name="calculated_load_value">Calculated Load Value</string>
+
   <string name="error_fmt">%s : Error</string>
   <string name="success_fmt">%1$s : %2$s</string>
   <string name="none">None</string>
