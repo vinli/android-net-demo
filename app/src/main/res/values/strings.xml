@@ -2,9 +2,6 @@
 
   <string name="app_name">Vinli Net Demo</string>
 
-  <string name="app_client_id">1dbac1be-0092-4d9f-b80e-b69469dc622a</string>
-  <string name="app_redirect_uri">https://android.netdemo.vin.li</string>
-
   <string name="first_name">First Name</string>
   <string name="last_name">Last Name</string>
   <string name="email">Email</string>

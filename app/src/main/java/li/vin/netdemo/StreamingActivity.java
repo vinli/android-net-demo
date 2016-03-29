@@ -7,12 +7,17 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import li.vin.net.Coordinate;
 import li.vin.net.Device;
 import li.vin.net.StreamMessage;
 import li.vin.net.StreamMessage.DataType;
@@ -29,6 +34,8 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
     private VinliApp vinliApp;
     private Device device;
     private GoogleMap googleMap;
+    private MarkerOptions deviceMarkerOptions;
+    private Marker deviceMarker;
 
     @Bind(R.id.rpm) TextView rpmTextView;
     @Bind(R.id.vehicle_speed) TextView vehicleSpeedTextView;
@@ -155,6 +162,27 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
                     }
                 }));
 
+        subscription.add(stream
+                .flatMap(StreamMessage.coordinate())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Coordinate>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(Coordinate coordinate) {
+                        Log.e("TESTO", "stream coord for " + device.name() + " : " + coordinate);
+                        updateMap(coordinate);
+                    }
+                }));
+
         stream.connect();
 
     }
@@ -170,5 +198,20 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
     @Override
     public void onMapReady(GoogleMap gMap) {
         this.googleMap = gMap;
+    }
+
+    private void updateMap(Coordinate coordinate){
+        LatLng latLng = new LatLng(coordinate.lat(), coordinate.lon());
+
+        if(deviceMarker == null){
+            deviceMarkerOptions = new MarkerOptions()
+                    .position(latLng)
+                    .title(device.name());
+
+            deviceMarker = googleMap.addMarker(deviceMarkerOptions);
+        }else{
+            deviceMarker.setPosition(latLng);
+        }
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.0f));
     }
 }
