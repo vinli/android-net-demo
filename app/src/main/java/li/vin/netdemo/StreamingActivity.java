@@ -6,6 +6,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import li.vin.net.Device;
 import li.vin.net.StreamMessage;
 import li.vin.net.Vinli;
@@ -15,11 +22,12 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.observables.ConnectableObservable;
 import rx.subscriptions.CompositeSubscription;
 
-public class StreamingActivity extends AppCompatActivity {
+public class StreamingActivity extends AppCompatActivity implements OnMapReadyCallback{
 
     private CompositeSubscription subscription;
     private VinliApp vinliApp;
     private Device device;
+    private GoogleMap googleMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +40,12 @@ public class StreamingActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         this.device = intent.getParcelableExtra(getString(R.string.streaming_device_key));
+
+        setTitle(device.name());
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         subscribeAll();
     }
@@ -144,4 +158,8 @@ public class StreamingActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onMapReady(GoogleMap gMap) {
+        this.googleMap = gMap;
+    }
 }

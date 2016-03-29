@@ -26,7 +26,6 @@
   <string name="refresh">Refresh</string>
 
   <string name="error_getting_devices">Error getting devices.</string>
-    <string name="title_activity_streaming">StreamingActivity</string>
 
   <string name="streaming_device_key">device</string>
 
