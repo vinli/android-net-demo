@@ -1,5 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="TypographyDashes">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="TypographyDashes">
 
   <string name="app_name">Vinli Net Demo</string>
 
@@ -27,5 +26,8 @@
   <string name="refresh">Refresh</string>
 
   <string name="error_getting_devices">Error getting devices.</string>
+    <string name="title_activity_streaming">StreamingActivity</string>
+
+  <string name="streaming_device_key">device</string>
 
 </resources>

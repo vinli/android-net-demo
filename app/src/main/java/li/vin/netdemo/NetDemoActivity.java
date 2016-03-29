@@ -224,10 +224,12 @@ public class NetDemoActivity extends AppCompatActivity {
 
             ConnectableObservable<StreamMessage> stream = device.stream().publish();
 
+            startStreamingButtion.setTag(device);
             startStreamingButtion.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View v) {
-                startStreamingActivity();
+                Button streamButton = (Button) v;
+                startStreamingActivity((Device) streamButton.getTag());
               }
             });
 
@@ -414,8 +416,10 @@ public class NetDemoActivity extends AppCompatActivity {
         }));
   }
 
-  private void startStreamingActivity(){
-
+  private void startStreamingActivity(Device device){
+    Intent intent = new Intent(this, StreamingActivity.class);
+    intent.putExtra(getString(R.string.streaming_device_key), device);
+    startActivity(intent);
   }
 
   /** Unsubscribe all. Need to call this to clean up rx resources. */
