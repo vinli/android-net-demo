@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -218,9 +219,17 @@ public class NetDemoActivity extends AppCompatActivity {
             TextView deviceName = (TextView) v.findViewById(R.id.device_name);
             TextView latestVehicle = (TextView) v.findViewById(R.id.latest_vehicle);
             TextView latestLocation = (TextView) v.findViewById(R.id.latest_location);
+            Button startStreamingButtion = (Button) v.findViewById(R.id.start_streaming_button);
             deviceContainer.addView(v);
 
             ConnectableObservable<StreamMessage> stream = device.stream().publish();
+
+            startStreamingButtion.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                startStreamingActivity();
+              }
+            });
 
             subscription.add(stream //
                 .flatMap(StreamMessage.onlyWithIntVal(DataType.RPM)) //
@@ -403,6 +412,10 @@ public class NetDemoActivity extends AppCompatActivity {
             view.setText(String.format(getString(R.string.success_fmt), label, val));
           }
         }));
+  }
+
+  private void startStreamingActivity(){
+
   }
 
   /** Unsubscribe all. Need to call this to clean up rx resources. */

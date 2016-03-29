@@ -15,6 +15,7 @@
   <string name="first_device">First Device</string>
   <string name="latest_vehicle">Latest Vehicle</string>
   <string name="latest_location">Latest Location</string>
+  <string name="start_streaming">Start Streaming</string>
 
   <string name="error_fmt">%s : Error</string>
   <string name="success_fmt">%1$s : %2$s</string>
