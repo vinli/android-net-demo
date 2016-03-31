@@ -1,10 +1,13 @@
 package li.vin.netdemo;
 
+import android.animation.ObjectAnimator;
+import android.animation.TypeEvaluator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Property;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,7 +37,6 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
     private VinliApp vinliApp;
     private Device device;
     private GoogleMap googleMap;
-    private MarkerOptions deviceMarkerOptions;
     private Marker deviceMarker;
 
     @Bind(R.id.rpm) TextView rpmTextView;
@@ -384,14 +386,39 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
         LatLng latLng = new LatLng(coordinate.lat(), coordinate.lon());
 
         if(deviceMarker == null){
-            deviceMarkerOptions = new MarkerOptions()
+            MarkerOptions deviceMarkerOptions = new MarkerOptions()
                     .position(latLng)
                     .title(device.name());
 
             deviceMarker = googleMap.addMarker(deviceMarkerOptions);
         }else{
-            deviceMarker.setPosition(latLng);
+            animateMarker(deviceMarker, latLng);
         }
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.0f));
+    }
+
+    public void animateMarker(Marker marker, LatLng finalPosition) {
+        TypeEvaluator<LatLng> typeEvaluator = new TypeEvaluator<LatLng>() {
+            @Override
+            public LatLng evaluate(float fraction, LatLng startValue, LatLng endValue) {
+                return interpolate(fraction, startValue, endValue);
+            }
+        };
+        Property<Marker, LatLng> property = Property.of(Marker.class, LatLng.class, "position");
+        ObjectAnimator animator = ObjectAnimator.ofObject(marker, property, typeEvaluator, finalPosition);
+        animator.setDuration(3500);
+        animator.start();
+    }
+
+    public LatLng interpolate(float fraction, LatLng a, LatLng b) {
+        double lat = (b.latitude - a.latitude) * fraction + a.latitude;
+        double lngDelta = b.longitude - a.longitude;
+
+        // Take the shortest path across the 180th meridian.
+        if (Math.abs(lngDelta) > 180) {
+            lngDelta -= Math.signum(lngDelta) * 360;
+        }
+        double lng = lngDelta * fraction + a.longitude;
+        return new LatLng(lat, lng);
     }
 }
