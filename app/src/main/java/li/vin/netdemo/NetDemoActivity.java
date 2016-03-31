@@ -4,7 +4,6 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.CookieManager;
@@ -19,8 +18,6 @@ import butterknife.OnClick;
 import li.vin.net.Device;
 import li.vin.net.Location;
 import li.vin.net.Page;
-import li.vin.net.StreamMessage;
-import li.vin.net.StreamMessage.DataType;
 import li.vin.net.User;
 import li.vin.net.Vehicle;
 import li.vin.net.Vinli;
@@ -230,43 +227,6 @@ public class NetDemoActivity extends AppCompatActivity {
                 startStreamingActivity((Device) streamButton.getTag());
               }
             });
-
-            //subscription.add(device.stream()
-            //    .observeOn(AndroidSchedulers.mainThread())
-            //    .subscribe(new Subscriber<StreamMessage>() {
-            //      @Override
-            //      public void onCompleted() {
-            //        Log.e("TESTO", "stream onCompleted for " + device.name());
-            //      }
-            //
-            //      @Override
-            //      public void onError(Throwable e) {
-            //        Log.e("TESTO", "stream onError for " + device.name(), e);
-            //      }
-            //
-            //      @Override
-            //      public void onNext(StreamMessage message) {
-            //        Log.e("TESTO", "stream onNext for " + device.name() + "------------------");
-            //        Log.e("TESTO", "---------------------------------------------------------");
-            //
-            //        int rpm = message.intVal(StreamMessage.DataType.RPM, -1);
-            //        if (rpm != -1) Log.e("TESTO", device.name() + " RPM: " + rpm);
-            //
-            //        int vss = message.intVal(StreamMessage.DataType.VEHICLE_SPEED, -1);
-            //        if (vss != -1) Log.e("TESTO", device.name() + " VSS: " + vss);
-            //
-            //        Coordinate coord = message.coord();
-            //        if (coord != null) Log.e("TESTO", device.name() + " coord: " + coord);
-            //
-            //        StreamMessage.AccelData accel = message.accel();
-            //        if (accel != null) Log.e("TESTO", device.name() + " accel: " + accel);
-            //
-            //        String fss = message.rawVal("fuelSystemStatus");
-            //        if (fss != null) Log.e("TESTO", device.name() + " fuelSystemStatus: " + fss);
-            //
-            //        Log.e("TESTO", "---------------------------------------------------------");
-            //      }
-            //    }));
 
             // Bind device name.
             subscribeToData(Observable.just(device.name()), deviceName,

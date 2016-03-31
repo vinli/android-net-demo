@@ -17,6 +17,14 @@
   <string name="vehicle_speed">Vehicle Speed</string>
   <string name="mass_air_flow">Mass Air Flow</string>
   <string name="calculated_load_value">Calculated Load Value</string>
+  <string name="coolant_temp">Coolant Temperature</string>
+  <string name="throttle_position">Throttle Position</string>
+  <string name="time_since_engine_start">Time Since Engine Start</string>
+  <string name="fuel_rail_pressure">Fuel Rail Pressure</string>
+  <string name="fuel_pressure">Fuel Pressure</string>
+  <string name="intake_air_temp">Intake Air Temperature</string>
+  <string name="intake_manifold_pressure">Intake Manifold Pressure</string>
+  <string name="timing_advance">Timing Advance</string>
 
   <string name="error_fmt">%s : Error</string>
   <string name="success_fmt">%1$s : %2$s</string>
