@@ -80,6 +80,7 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
         cleanupSubscription();
     }
 
+    /** Permissively subscribe to all data. Clean up beforehand if necessary. */
     private void subscribeAll() {
         if (vinliApp == null) return;
 
@@ -87,6 +88,8 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
         subscription = new CompositeSubscription();
         ConnectableObservable<StreamMessage> stream = device.stream().publish();
 
+        /** Add a subscription to the CompositeSubscription. Filter for only messages that contain an RPM update.
+         *  Making sure to observeOn the main thread since we are updating a TextView. */
         subscription.add(stream
                 .flatMap(StreamMessage.onlyWithIntVal(DataType.RPM))
                 .observeOn(AndroidSchedulers.mainThread())
@@ -376,6 +379,7 @@ public class StreamingActivity extends AppCompatActivity implements OnMapReadyCa
         this.googleMap = gMap;
     }
 
+    /** Update the marker on the map with the new coordinate from the stream. */
     private void updateMap(Coordinate coordinate){
         LatLng latLng = new LatLng(coordinate.lat(), coordinate.lon());
 
