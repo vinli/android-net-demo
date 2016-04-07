@@ -2,12 +2,8 @@ package li.vin.netdemo;
 
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,8 +15,7 @@ import li.vin.net.Location;
 import li.vin.net.Page;
 import li.vin.net.User;
 import li.vin.net.Vehicle;
-import li.vin.net.Vinli;
-import li.vin.net.VinliApp;
+import li.vin.net.VinliBaseActivity;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -37,7 +32,7 @@ import rx.subscriptions.CompositeSubscription;
  * href="https://github.com/ReactiveX/RxJava">RxJava</a>, and
  * <a href="http://jakewharton.github.io/butterknife/">Butter Knife</a>.
  */
-public class NetDemoActivity extends AppCompatActivity {
+public class NetDemoActivity extends VinliBaseActivity {
 
   @Bind(R.id.first_name) TextView firstName;
   @Bind(R.id.last_name) TextView lastName;
@@ -46,22 +41,28 @@ public class NetDemoActivity extends AppCompatActivity {
   @Bind(R.id.device_container) LinearLayout deviceContainer;
 
   private boolean contentBound;
-  private boolean signInRequested;
-  private VinliApp vinliApp;
   private CompositeSubscription subscription;
 
   @Override
   protected void onResume() {
     super.onResume();
 
-    loadApp(getIntent());
+    if(!super.signedIn()){
+      signIn();
+    }else{
+      setup();
+    }
   }
 
   @Override
   protected void onNewIntent(Intent intent) {
     super.onNewIntent(intent);
 
-    loadApp(intent);
+    if(!super.signedIn()){
+      signIn();
+    }else{
+      setup();
+    }
   }
 
   @Override
@@ -73,52 +74,27 @@ public class NetDemoActivity extends AppCompatActivity {
 
   @OnClick(R.id.refresh)
   void onRefreshClick() {
-    if (vinliApp != null && !isFinishing()) {
+    if (super.signedIn() && !isFinishing()) {
       subscribeAll();
     }
   }
 
   @OnClick(R.id.sign_out)
   void onSignOutClick() {
-    if (vinliApp != null && !isFinishing()) {
+    if (super.signedIn() && !isFinishing()) {
       signIn();
     }
   }
 
-  /**
-   * Load the VinliApp instance if possible - if not, proceed by either signing in or finishing the
-   * Activity.
-   */
-  private void loadApp(Intent intent) {
-    if (vinliApp == null) {
-      vinliApp = intent == null
-          ? Vinli.loadApp(this)
-          : Vinli.initApp(this, intent);
-      if (vinliApp == null) {
-        if (signInRequested) {
-          // If a sign in was already requested, it failed or was canceled - finish.
-          finish();
-        } else {
-          // Otherwise, sign in.
-          signIn();
-        }
-      } else {
-        // Succesfully loaded VinliApp - proceed.
-        setupContent();
-        subscribeAll();
-      }
-    }
+  public void setup(){
+    setupContent();
+    subscribeAll();
   }
 
-  /** Clear existing session state and sign in. */
-  private void signIn() {
-    signInRequested = true;
-    setIntent(new Intent());
-    Vinli.clearApp(this);
-    vinliApp = null;
-    Vinli.signIn(this, //
-        getString(R.string.app_client_id), //
-        getString(R.string.app_redirect_uri), //
+  public void signIn(){
+    super.signIn(
+        getString(R.string.app_client_id),
+        getString(R.string.app_redirect_uri),
         PendingIntent.getActivity(this, 0, new Intent(this, NetDemoActivity.class), 0));
   }
 
@@ -136,7 +112,7 @@ public class NetDemoActivity extends AppCompatActivity {
     cleanupSubscription();
 
     // Sanity check.
-    if (vinliApp == null || !contentBound) return;
+    if (!super.signedIn() || !contentBound) return;
 
     // Gen composite subscription to hold all individual subscriptions to data.
     subscription = new CompositeSubscription();
