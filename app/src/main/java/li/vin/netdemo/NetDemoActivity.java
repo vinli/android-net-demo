@@ -116,7 +116,6 @@ public class NetDemoActivity extends AppCompatActivity {
     setIntent(new Intent());
     Vinli.clearApp(this);
     vinliApp = null;
-    killAllCookies();
     Vinli.signIn(this, //
         getString(R.string.app_client_id), //
         getString(R.string.app_redirect_uri), //
@@ -287,19 +286,5 @@ public class NetDemoActivity extends AppCompatActivity {
       if (!subscription.isUnsubscribed()) subscription.unsubscribe();
       subscription = null;
     }
-  }
-
-  /**
-   * Kill all WebView cookies. Need this to sign out & in properly, so WebView doesn't cache the
-   * last session.
-   */
-  @SuppressWarnings("deprecation")
-  private void killAllCookies() {
-    CookieSyncManager cookieSyncManager = CookieSyncManager.createInstance(this);
-    CookieManager cookieManager = CookieManager.getInstance();
-    cookieManager.removeAllCookie();
-    if (Build.VERSION.SDK_INT >= 21) cookieManager.removeAllCookies(null);
-    cookieSyncManager.sync();
-    if (Build.VERSION.SDK_INT >= 21) cookieManager.flush();
   }
 }
