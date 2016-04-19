@@ -8,6 +8,8 @@ import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
@@ -21,7 +23,6 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import li.vin.net.Device;
 import li.vin.net.DistanceUnit;
 import li.vin.net.Location;
@@ -82,14 +83,33 @@ public class NetDemoActivity extends AppCompatActivity {
     cleanupSubscription();
   }
 
-  @OnClick(R.id.refresh)
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu){
+    getMenuInflater().inflate(R.menu.menu_main, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item){
+    int id = item.getItemId();
+
+    if(id == R.id.action_refresh){
+      onRefreshClick();
+      return true;
+    }else if(id == R.id.action_sign_out){
+      onSignOutClick();
+      return true;
+    }else{
+      return super.onOptionsItemSelected(item);
+    }
+  }
+
   void onRefreshClick() {
     if (vinliApp != null && !isFinishing()) {
       subscribeAll();
     }
   }
 
-  @OnClick(R.id.sign_out)
   void onSignOutClick() {
     if (vinliApp != null && !isFinishing()) {
       signIn();
