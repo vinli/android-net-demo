@@ -15,6 +15,7 @@
   <string name="first_device">First Device</string>
   <string name="latest_vehicle">Latest Vehicle</string>
   <string name="latest_location">Latest Location</string>
+  <string name="odometer_estimate">Odometer Estimate</string>
 
   <string name="error_fmt">%s : Error</string>
   <string name="success_fmt">%1$s : %2$s</string>
@@ -24,6 +25,7 @@
 
   <string name="sign_out">Sign Out</string>
   <string name="refresh">Refresh</string>
+  <string name="set_odometer_button">Set Odometer</string>
 
   <string name="error_getting_devices">Error getting devices.</string>
 

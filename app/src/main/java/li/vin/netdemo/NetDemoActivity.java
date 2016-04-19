@@ -1,22 +1,33 @@
 package li.vin.netdemo;
 
+import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import li.vin.net.Device;
+import li.vin.net.DistanceUnit;
 import li.vin.net.Location;
+import li.vin.net.Odometer;
 import li.vin.net.Page;
+import li.vin.net.TimeSeries;
 import li.vin.net.User;
 import li.vin.net.Vehicle;
 import li.vin.net.Vinli;
@@ -215,24 +226,56 @@ public class NetDemoActivity extends AppCompatActivity {
             TextView deviceName = (TextView) v.findViewById(R.id.device_name);
             TextView latestVehicle = (TextView) v.findViewById(R.id.latest_vehicle);
             TextView latestLocation = (TextView) v.findViewById(R.id.latest_location);
+            TextView latestOdometer = (TextView) v.findViewById(R.id.odometer_estimate);
+            final Button setOdometerButton = (Button) v.findViewById(R.id.set_odometer_button);
+            setOdometerButton.setClickable(false);
             deviceContainer.addView(v);
+
+            setOdometerButton.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                Button button = (Button) v;
+                presentSetOdometerModal((Vehicle) button.getTag(), false);
+              }
+            });
 
             // Bind device name.
             subscribeToData(Observable.just(device.name()), deviceName,
                 getString(R.string.device_name));
 
+
+            Observable<Vehicle> vehicleObservable = device.latestVehicle();
+
             // Bind latest vehicle info.
-            subscribeToData(device.latestVehicle().map(new Func1<Vehicle, String>() {
+            subscribeToData(vehicleObservable.map(new Func1<Vehicle, String>() {
               @Override
               public String call(Vehicle vehicle) {
                 if (vehicle == null) return getString(R.string.none);
-                String vStr = (vehicle.year() + " " + //
-                    vehicle.make() + " " + //
-                    vehicle.model()).trim();
-                if (vStr.isEmpty()) return getString(R.string.unnamed_vehicle);
-                return vStr;
+
+                setOdometerButton.setTag(vehicle);
+                setOdometerButton.setClickable(true);
+
+                return getNameForVehicle(vehicle);
               }
             }), latestVehicle, getString(R.string.latest_vehicle));
+
+            subscribeToData(vehicleObservable.single().flatMap(new Func1<Vehicle, Observable<TimeSeries<Odometer>>>() {
+              @Override
+              public Observable<TimeSeries<Odometer>> call(Vehicle vehicle) {
+                return vehicle.odometerReports();
+              }
+            }).map(new Func1<TimeSeries<Odometer>, String>() {
+              @Override
+              public String call(TimeSeries<Odometer> odometerTimeSeries) {
+                List<Odometer> odometerList = odometerTimeSeries.getItems();
+                if (odometerList.size() > 0) {
+                  Odometer odometer = odometerList.get(0);
+                  return String.format("%.2f miles", odometer.reading() * 0.00062137);
+                } else {
+                  return getResources().getString(R.string.none);
+                }
+              }
+            }), latestOdometer, getResources().getString(R.string.odometer_estimate));
 
             // Bind latest location info.
             subscribeToData(device.latestlocation().map(new Func1<Location, String>() {
@@ -301,5 +344,69 @@ public class NetDemoActivity extends AppCompatActivity {
     if (Build.VERSION.SDK_INT >= 21) cookieManager.removeAllCookies(null);
     cookieSyncManager.sync();
     if (Build.VERSION.SDK_INT >= 21) cookieManager.flush();
+  }
+
+  private void presentSetOdometerModal(final Vehicle vehicle, boolean formatError){
+    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+    dialogBuilder.setTitle(getNameForVehicle(vehicle));
+
+    if(formatError){
+      dialogBuilder.setMessage("Please enter a valid number for the odometer reading for your car:");
+    }else{
+      dialogBuilder.setMessage("Please enter an odometer reading for you car:");
+    }
+
+    LinearLayout dialogLayout = (LinearLayout) LayoutInflater.from(NetDemoActivity.this).inflate(R.layout.odometer_picker, null, false);
+    final EditText odometerReading = (EditText) dialogLayout.findViewById(R.id.reading_field);
+    final NumberPicker unitPicker = (NumberPicker) dialogLayout.findViewById(R.id.unit_picker);
+    odometerReading.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+    unitPicker.setMinValue(0);
+    unitPicker.setMaxValue(2);
+    unitPicker.setDisplayedValues(new String[]{"km", "m", "mi"});
+    dialogBuilder.setView(dialogLayout);
+
+    dialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+      public void onClick(DialogInterface dialog, int whichButton) {
+        String inputText = odometerReading.getText().toString();
+        try {
+          Double inputDouble = Double.parseDouble(inputText);
+          DistanceUnit unit;
+          switch (unitPicker.getValue()) {
+            case 0:
+              unit = DistanceUnit.KILOMETERS;
+              break;
+            case 1:
+              unit = DistanceUnit.METERS;
+              break;
+            case 2:
+              unit = DistanceUnit.MILES;
+              break;
+            default:
+              unit = DistanceUnit.MILES;
+              break;
+          }
+          Odometer.create().reading(inputDouble).unit(unit).vehicleId(vehicle.id()).save();
+        } catch (NumberFormatException e) {
+          presentSetOdometerModal(vehicle, true);
+        }
+      }
+    });
+
+    dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+      }
+    });
+
+    dialogBuilder.show();
+  }
+
+  private String getNameForVehicle(Vehicle vehicle){
+    String vStr = (vehicle.year() + " " + //
+        vehicle.make() + " " + //
+        vehicle.model()).trim();
+
+    if (vStr.isEmpty()) return getString(R.string.unnamed_vehicle);
+    return vStr;
   }
 }
