@@ -17,11 +17,11 @@
   <string name="latest_location">Latest Location</string>
   <string name="odometer_estimate">Odometer Estimate</string>
 
-  <string name="error_fmt">%s : Error</string>
-  <string name="success_fmt">%1$s : %2$s</string>
+  <string name="error_fmt"><![CDATA[<b>%s :</b> Error]]></string>
+  <string name="success_fmt"><![CDATA[<b>%1$s :</b> %2$s]]></string>
   <string name="none">None</string>
   <string name="unnamed_vehicle">Unnamed Vehicle</string>
-  <string name="waiting_fmt">%s : --</string>
+  <string name="waiting_fmt"><![CDATA[<b>%s :</b> --]]></string>
 
   <string name="sign_out">Sign Out</string>
   <string name="refresh">Refresh</string>

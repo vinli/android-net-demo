@@ -25,4 +25,6 @@ dependencies {
   compile 'com.android.support:support-annotations:23.1.1'
   compile 'li.vin:android-net:1.0.0-beta.5'
   compile 'com.jakewharton:butterknife:7.0.1'
+  compile 'com.squareup.picasso:picasso:2.5.2'
+  compile 'com.pkmmte.view:circularimageview:1.1'
 }

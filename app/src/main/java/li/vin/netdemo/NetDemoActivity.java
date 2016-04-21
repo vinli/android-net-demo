@@ -6,7 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,10 +17,15 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.pkmmte.view.CircularImageView;
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 import butterknife.Bind;
@@ -247,9 +254,12 @@ public class NetDemoActivity extends AppCompatActivity {
             TextView latestVehicle = (TextView) v.findViewById(R.id.latest_vehicle);
             TextView latestLocation = (TextView) v.findViewById(R.id.latest_location);
             TextView latestOdometer = (TextView) v.findViewById(R.id.odometer_estimate);
+            CircularImageView deviceIcon = (CircularImageView) v.findViewById(R.id.device_icon);
             final Button setOdometerButton = (Button) v.findViewById(R.id.set_odometer_button);
             setOdometerButton.setClickable(false);
             deviceContainer.addView(v);
+
+            Picasso.with(NetDemoActivity.this).load(device.icon()).into(deviceIcon);
 
             setOdometerButton.setOnClickListener(new View.OnClickListener() {
               @Override
@@ -262,7 +272,6 @@ public class NetDemoActivity extends AppCompatActivity {
             // Bind device name.
             subscribeToData(Observable.just(device.name()), deviceName,
                 getString(R.string.device_name));
-
 
             Observable<Vehicle> vehicleObservable = device.latestVehicle();
 
@@ -323,7 +332,7 @@ public class NetDemoActivity extends AppCompatActivity {
         .doOnSubscribe(new Action0() {
           @Override
           public void call() {
-            view.setText(String.format(getString(R.string.waiting_fmt), label));
+            view.setText(Html.fromHtml(String.format(getString(R.string.waiting_fmt), label)));
           }
         }) //
         .subscribe(new Subscriber<T>() {
@@ -334,12 +343,13 @@ public class NetDemoActivity extends AppCompatActivity {
 
           @Override
           public void onError(Throwable e) {
-            view.setText(String.format(getString(R.string.error_fmt), label));
+            view.setText(Html.fromHtml(String.format(getString(R.string.error_fmt), label)));
           }
 
           @Override
           public void onNext(T val) {
-            view.setText(String.format(getString(R.string.success_fmt), label, val));
+            view.setText(Html.fromHtml(String.format(getString(R.string.success_fmt), label, val)));
+            //view.setText(String.format(getString(R.string.success_fmt), label, val));
           }
         }));
   }
