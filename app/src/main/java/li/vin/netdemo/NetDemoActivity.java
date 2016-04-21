@@ -9,7 +9,6 @@ import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.InputType;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +17,6 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -64,6 +62,7 @@ public class NetDemoActivity extends AppCompatActivity {
   @Bind(R.id.email) TextView email;
   @Bind(R.id.phone) TextView phone;
   @Bind(R.id.device_container) LinearLayout deviceContainer;
+  @Bind(R.id.user_icon) CircularImageView userIconImageView;
 
   private boolean contentBound;
   private boolean signInRequested;
@@ -191,6 +190,27 @@ public class NetDemoActivity extends AppCompatActivity {
     // rather than making unnecessary extra User lookups each time.
     ConnectableObservable<User> userObservable = vinliApp.currentUser().publish();
 
+    userObservable.observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<User>() {
+      @Override
+      public void onCompleted() {
+
+      }
+
+      @Override
+      public void onError(Throwable e) {
+
+      }
+
+      @Override
+      public void onNext(User user) {
+        if(user.image() != null){
+          Picasso.with(NetDemoActivity.this).load(user.image()).into(userIconImageView);
+        }else{
+          Picasso.with(NetDemoActivity.this).load(R.drawable.default_user_image).into(userIconImageView);
+        }
+      }
+    });
+
     // Bind first name.
     subscribeToData(userObservable.map(new Func1<User, String>() {
       @Override
@@ -260,7 +280,11 @@ public class NetDemoActivity extends AppCompatActivity {
             setOdometerButton.setClickable(false);
             deviceContainer.addView(v);
 
-            Picasso.with(NetDemoActivity.this).load(device.icon()).into(deviceIcon);
+            if(device.icon() != null){
+              Picasso.with(NetDemoActivity.this).load(device.icon()).into(deviceIcon);
+            }else{
+              Picasso.with(NetDemoActivity.this).load(R.drawable.default_device_image).into(deviceIcon);
+            }
 
             setOdometerButton.setOnClickListener(new View.OnClickListener() {
               @Override
