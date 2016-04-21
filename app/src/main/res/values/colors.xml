@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <item name="button_dark_gray" type="color">#494F54</item>
+  <item name="light_text_color" type="color">#97A4AD</item>
+  <item name="item_selected" type="color">#97A4AD</item>
+</resources>

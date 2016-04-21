@@ -52,10 +52,16 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"/>
 
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="8dp"/>
+
     <Button
       android:id="@+id/set_odometer_button"
+      android:background="@drawable/demo_button"
+      android:textColor="@android:color/white"
       android:text="@string/set_odometer_button"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"/>
 
   </LinearLayout>
