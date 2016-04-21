@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
@@ -377,7 +378,7 @@ public class NetDemoActivity extends AppCompatActivity {
   }
 
   private void presentSetOdometerModal(final Vehicle vehicle, boolean formatError){
-    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT);
     dialogBuilder.setTitle(getNameForVehicle(vehicle));
 
     if(formatError){
@@ -389,6 +390,7 @@ public class NetDemoActivity extends AppCompatActivity {
     LinearLayout dialogLayout = (LinearLayout) LayoutInflater.from(NetDemoActivity.this).inflate(R.layout.odometer_picker, null, false);
     final EditText odometerReading = (EditText) dialogLayout.findViewById(R.id.reading_field);
     final NumberPicker unitPicker = (NumberPicker) dialogLayout.findViewById(R.id.unit_picker);
+    odometerReading.getBackground().setColorFilter(getResources().getColor(R.color.button_dark_gray), PorterDuff.Mode.SRC_ATOP);
     odometerReading.setRawInputType(InputType.TYPE_CLASS_NUMBER);
     unitPicker.setMinValue(0);
     unitPicker.setMaxValue(2);
@@ -398,25 +400,29 @@ public class NetDemoActivity extends AppCompatActivity {
     dialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
       public void onClick(DialogInterface dialog, int whichButton) {
         String inputText = odometerReading.getText().toString();
-        try {
-          Double inputDouble = Double.parseDouble(inputText);
-          DistanceUnit unit;
-          switch (unitPicker.getValue()) {
-            case 0:
-              unit = DistanceUnit.KILOMETERS;
-              break;
-            case 1:
-              unit = DistanceUnit.METERS;
-              break;
-            case 2:
-              unit = DistanceUnit.MILES;
-              break;
-            default:
-              unit = DistanceUnit.MILES;
-              break;
+        if(inputText.length() > 0){
+          try {
+            Double inputDouble = Double.parseDouble(inputText);
+            DistanceUnit unit;
+            switch (unitPicker.getValue()) {
+              case 0:
+                unit = DistanceUnit.KILOMETERS;
+                break;
+              case 1:
+                unit = DistanceUnit.METERS;
+                break;
+              case 2:
+                unit = DistanceUnit.MILES;
+                break;
+              default:
+                unit = DistanceUnit.MILES;
+                break;
+            }
+            Odometer.create().reading(inputDouble).unit(unit).vehicleId(vehicle.id()).save();
+          } catch (NumberFormatException e) {
+            presentSetOdometerModal(vehicle, true);
           }
-          Odometer.create().reading(inputDouble).unit(unit).vehicleId(vehicle.id()).save();
-        } catch (NumberFormatException e) {
+        }else{
           presentSetOdometerModal(vehicle, true);
         }
       }
@@ -428,7 +434,18 @@ public class NetDemoActivity extends AppCompatActivity {
       }
     });
 
-    dialogBuilder.show();
+    AlertDialog dialog = dialogBuilder.show();
+
+    int titleDividerId = getResources().getIdentifier("titleDivider", "id", "android");
+    View titleDivider = dialog.findViewById(titleDividerId);
+    if(titleDivider != null){
+      titleDivider.setBackgroundColor(getResources().getColor(R.color.button_dark_gray));
+    }
+    int textViewId = getResources().getIdentifier("alertTitle", "id", "android");
+    TextView titleView = (TextView) dialog.findViewById(textViewId);
+    if(titleView != null){
+      titleView.setTextColor(getResources().getColor(R.color.button_dark_gray));
+    }
   }
 
   private String getNameForVehicle(Vehicle vehicle){

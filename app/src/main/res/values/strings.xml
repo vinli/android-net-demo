@@ -28,5 +28,6 @@
   <string name="set_odometer_button">Set Odometer</string>
 
   <string name="error_getting_devices">Error getting devices.</string>
+  <string name="devices_tag">Devices</string>
 
 </resources>

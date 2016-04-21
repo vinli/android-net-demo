@@ -2,8 +2,7 @@
             xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context=".NetDemoActivity"
-  >
+            tools:context=".NetDemoActivity">
 
   <LinearLayout
     android:id="@+id/main_linearlayout"
@@ -43,7 +42,22 @@
       android:layout_height="wrap_content"
       android:text="@string/phone"
       />
-      
+    
+    <Space
+      android:layout_width="wrap_content"
+      android:layout_height="16dp"/>
+
+    <TextView
+      android:text="@string/devices_tag"
+      android:layout_width="match_parent"
+      android:layout_height="32dp"
+      android:textSize="18dp"
+      android:gravity="center"/>
+
+    <View
+      android:background="@color/button_dark_gray"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"/>
 
     <LinearLayout
       android:id="@+id/device_container"
