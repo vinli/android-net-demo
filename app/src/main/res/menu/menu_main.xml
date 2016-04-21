@@ -6,13 +6,15 @@
   <item
     android:id="@+id/action_refresh"
     android:title="@string/refresh"
+    android:icon="@drawable/refresh_light"
     android:orderInCategory="100"
-    app:showAsAction="never"
+    app:showAsAction="ifRoom"
     />
 
   <item
     android:id="@+id/action_sign_out"
     android:title="@string/sign_out"
+    android:icon="@drawable/logout_light"
     android:orderInCategory="100"
-    app:showAsAction="never"/>
+    app:showAsAction="ifRoom"/>
 </menu>
