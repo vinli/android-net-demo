@@ -12,6 +12,7 @@ import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -71,6 +72,8 @@ public class NetDemoActivity extends AppCompatActivity {
   private boolean signInRequested;
   private VinliApp vinliApp;
   private CompositeSubscription subscription;
+
+  private final double MILES_PER_METER = 0.00062137;
 
   @Override
   protected void onResume() {
@@ -206,11 +209,7 @@ public class NetDemoActivity extends AppCompatActivity {
 
       @Override
       public void onNext(User user) {
-        if(user.image() != null){
-          Picasso.with(NetDemoActivity.this).load(user.image()).into(userIconImageView);
-        }else{
-          Picasso.with(NetDemoActivity.this).load(R.drawable.default_user_image).into(userIconImageView);
-        }
+        Picasso.with(NetDemoActivity.this).load(user.image()).placeholder(R.drawable.default_user_image).into(userIconImageView);
       }
     });
 
@@ -288,11 +287,7 @@ public class NetDemoActivity extends AppCompatActivity {
             setOdometerButton.setClickable(false);
             deviceContainer.addView(v);
 
-            if(device.icon() != null){
-              Picasso.with(NetDemoActivity.this).load(device.icon()).into(deviceIcon);
-            }else{
-              Picasso.with(NetDemoActivity.this).load(R.drawable.default_device_image).into(deviceIcon);
-            }
+            Picasso.with(NetDemoActivity.this).load(device.icon()).placeholder(R.drawable.default_device_image).into(deviceIcon);
 
             setOdometerButton.setOnClickListener(new View.OnClickListener() {
               @Override
@@ -321,7 +316,7 @@ public class NetDemoActivity extends AppCompatActivity {
               }
             }), latestVehicle, getString(R.string.latest_vehicle));
 
-            subscribeToData(vehicleObservable.single().flatMap(new Func1<Vehicle, Observable<TimeSeries<Odometer>>>() {
+            subscribeToData(vehicleObservable.flatMap(new Func1<Vehicle, Observable<TimeSeries<Odometer>>>() {
               @Override
               public Observable<TimeSeries<Odometer>> call(Vehicle vehicle) {
                 return vehicle.odometerReports();
@@ -331,8 +326,9 @@ public class NetDemoActivity extends AppCompatActivity {
               public String call(TimeSeries<Odometer> odometerTimeSeries) {
                 List<Odometer> odometerList = odometerTimeSeries.getItems();
                 if (odometerList.size() > 0) {
+                  Log.e("@@@@@", "Size: " + odometerList.size());
                   Odometer odometer = odometerList.get(0);
-                  return String.format("%.2f miles", odometer.reading() * 0.00062137);
+                  return String.format("%.2f miles", odometer.reading() * MILES_PER_METER);
                 } else {
                   return getResources().getString(R.string.none);
                 }
@@ -382,7 +378,6 @@ public class NetDemoActivity extends AppCompatActivity {
           @Override
           public void onNext(T val) {
             view.setText(Html.fromHtml(String.format(getString(R.string.success_fmt), label, val)));
-            //view.setText(String.format(getString(R.string.success_fmt), label, val));
           }
         }));
   }
@@ -410,6 +405,11 @@ public class NetDemoActivity extends AppCompatActivity {
   }
 
   private void presentSetOdometerModal(final Vehicle vehicle, boolean formatError){
+    if(vehicle == null){
+      Toast.makeText(NetDemoActivity.this, getString(R.string.null_vehicle_toast_message), Toast.LENGTH_SHORT).show();
+      return;
+    }
+
     AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_LIGHT);
     dialogBuilder.setTitle(getNameForVehicle(vehicle));
 
@@ -450,7 +450,25 @@ public class NetDemoActivity extends AppCompatActivity {
                 unit = DistanceUnit.MILES;
                 break;
             }
-            Odometer.create().reading(inputDouble).unit(unit).vehicleId(vehicle.id()).save();
+            Odometer.create()
+                .reading(inputDouble).unit(unit)
+                .vehicleId(vehicle.id())
+                .save().subscribe(new Subscriber<Odometer>() {
+              @Override
+              public void onCompleted() {
+
+              }
+
+              @Override
+              public void onError(Throwable e) {
+
+              }
+
+              @Override
+              public void onNext(Odometer odometer) {
+                Toast.makeText(NetDemoActivity.this, getString(R.string.successful_odometer_creation), Toast.LENGTH_SHORT).show();
+              }
+            });
           } catch (NumberFormatException e) {
             presentSetOdometerModal(vehicle, true);
           }
@@ -481,11 +499,16 @@ public class NetDemoActivity extends AppCompatActivity {
   }
 
   private String getNameForVehicle(Vehicle vehicle){
-    String vStr = (vehicle.year() + " " + //
-        vehicle.make() + " " + //
-        vehicle.model()).trim();
+    if(vehicle == null){
+      return getString(R.string.unnamed_vehicle);
+    }
 
-    if (vStr.isEmpty()) return getString(R.string.unnamed_vehicle);
+    String vStr = String.format("%s %s %s", vehicle.year(), vehicle.make(), vehicle.model()).trim();
+
+    if (vStr.isEmpty() || (vehicle.year() == null && vehicle.make() == null && vehicle.model() == null)){
+      return getString(R.string.unnamed_vehicle);
+    }
+
     return vStr;
   }
 }

@@ -30,4 +30,7 @@
   <string name="error_getting_devices">Error getting devices.</string>
   <string name="devices_tag">Devices</string>
 
+  <string name="null_vehicle_toast_message">Cannot set the odometer, no vehicle found.</string>
+  <string name="successful_odometer_creation">Successfully set the odometer.</string>
+
 </resources>
