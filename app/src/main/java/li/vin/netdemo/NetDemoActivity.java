@@ -2,11 +2,14 @@ package li.vin.netdemo;
 
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.PhoneNumberUtils;
+import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -239,7 +242,12 @@ public class NetDemoActivity extends AppCompatActivity {
     subscribeToData(userObservable.map(new Func1<User, String>() {
       @Override
       public String call(User user) {
-        return user.phone();
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        if(Build.VERSION.SDK_INT >= 21){
+          return PhoneNumberUtils.formatNumber(user.phone(), telephonyManager.getSimCountryIso());
+        }else{
+          return user.phone();
+        }
       }
     }), phone, getString(R.string.phone));
 
