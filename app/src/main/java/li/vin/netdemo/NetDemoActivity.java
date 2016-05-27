@@ -246,7 +246,7 @@ public class NetDemoActivity extends AppCompatActivity {
         }));
 
     // Don't forget to connect the ConnectableObservable, or nothing will happen!
-    userObservable.connect();
+    subscription.add(userObservable.connect());
   }
 
   /**
