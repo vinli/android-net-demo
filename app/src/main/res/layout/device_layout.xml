@@ -4,66 +4,43 @@
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
   android:orientation="horizontal"
-  >
-
-  <com.pkmmte.view.CircularImageView
-    android:id="@+id/device_icon"
-    android:layout_width="64dp"
-    android:layout_height="64dp"
-    android:layout_gravity="center_vertical"/>
-
-  <Space
-    android:layout_width="@dimen/activity_horizontal_margin"
-    android:layout_height="wrap_content"/>
+  android:weightSum="1.0">
 
   <LinearLayout
-    android:layout_width="match_parent"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <Space
-      android:layout_width="wrap_content"
-      android:layout_height="32dp"
-      />
+    android:orientation="vertical"
+    android:layout_weight="0.5">
 
     <TextView
       android:id="@+id/device_name"
       android:text="@string/device_name"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      />
+      android:layout_height="wrap_content"/>
 
     <TextView
       android:id="@+id/latest_vehicle"
       android:text="@string/latest_vehicle"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      />
+      android:layout_height="wrap_content"/>
 
     <TextView
       android:id="@+id/latest_location"
       android:text="@string/latest_location"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      />
+      android:layout_height="wrap_content"/>
 
     <TextView
       android:id="@+id/odometer_estimate"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"/>
 
-    <Space
-      android:layout_width="match_parent"
-      android:layout_height="8dp"/>
-
-    <Button
-      android:id="@+id/set_odometer_button"
-      android:background="@drawable/demo_button"
-      android:textColor="@android:color/white"
-      android:text="@string/set_odometer_button"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"/>
-
   </LinearLayout>
+
+  <Button
+    android:id="@+id/stream_button"
+    android:text="@string/stream_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
 
 </LinearLayout>

@@ -3,9 +3,6 @@
 
   <string name="app_name">Vinli Net Demo</string>
 
-  <string name="app_client_id">1dbac1be-0092-4d9f-b80e-b69469dc622a</string>
-  <string name="app_redirect_uri">https://android.netdemo.vin.li</string>
-
   <string name="first_name">First Name</string>
   <string name="last_name">Last Name</string>
   <string name="email">Email</string>
@@ -15,22 +12,12 @@
   <string name="first_device">First Device</string>
   <string name="latest_vehicle">Latest Vehicle</string>
   <string name="latest_location">Latest Location</string>
-  <string name="odometer_estimate">Odometer Estimate</string>
+  <string name="stream_button">Stream</string>
 
-  <string name="error_fmt"><![CDATA[<b>%s :</b> Error]]></string>
   <string name="success_fmt"><![CDATA[<b>%1$s :</b> %2$s]]></string>
   <string name="none">None</string>
   <string name="unnamed_vehicle">Unnamed Vehicle</string>
-  <string name="waiting_fmt"><![CDATA[<b>%s :</b> --]]></string>
+  <string name="unnamed_device">Unnamed Device</string>
 
   <string name="sign_out">Sign Out</string>
-  <string name="refresh">Refresh</string>
-  <string name="set_odometer_button">Set Odometer</string>
-
-  <string name="error_getting_devices">Error getting devices.</string>
-  <string name="devices_tag">Devices</string>
-
-  <string name="null_vehicle_toast_message">Cannot set the odometer, no vehicle found.</string>
-  <string name="successful_odometer_creation">Successfully set the odometer.</string>
-
 </resources>

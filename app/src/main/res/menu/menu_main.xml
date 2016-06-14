@@ -3,13 +3,6 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="iso.io.iso.MainActivity"
   >
-  <item
-    android:id="@+id/action_refresh"
-    android:title="@string/refresh"
-    android:icon="@drawable/refresh_light"
-    android:orderInCategory="100"
-    app:showAsAction="ifRoom"
-    />
 
   <item
     android:id="@+id/action_sign_out"
@@ -17,4 +10,5 @@
     android:icon="@drawable/logout_light"
     android:orderInCategory="100"
     app:showAsAction="ifRoom"/>
+
 </menu>
