@@ -15,21 +15,19 @@ import android.webkit.CookieSyncManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+import li.vin.net.Coordinate;
 import li.vin.net.Device;
 import li.vin.net.Location;
 import li.vin.net.Page;
+import li.vin.net.StreamMessage;
 import li.vin.net.User;
 import li.vin.net.Vehicle;
 import li.vin.net.Vinli;
 import li.vin.net.VinliApp;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.observables.ConnectableObservable;
 import rx.subscriptions.CompositeSubscription;
 
 /**
@@ -41,17 +39,20 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class NetDemoActivity extends AppCompatActivity {
 
-  @Bind(R.id.first_name) TextView firstName;
-  @Bind(R.id.last_name) TextView lastName;
-  @Bind(R.id.email) TextView email;
-  @Bind(R.id.phone) TextView phone;
-  @Bind(R.id.device_container) LinearLayout deviceContainer;
-
+  private final int DEFAULT_VALUE = -10101;
   private final String TAG = this.getClass().getSimpleName();
+
+  private TextView firstName;
+  private TextView lastName;
+  private TextView email;
+  private TextView phone;
+  private LinearLayout deviceContainer;
+
   private boolean contentBound;
   private boolean signInRequested;
   private VinliApp vinliApp;
   private CompositeSubscription subscription;
+  private Subscription streamSubscription;
 
   @Override
   protected void onResume() {
@@ -65,6 +66,14 @@ public class NetDemoActivity extends AppCompatActivity {
     super.onNewIntent(intent);
 
     loadApp(intent);
+  }
+
+  @Override
+  protected void onPause(){
+    super.onPause();
+
+    // We don't want to continue the stream in the background.
+    stopStream();
   }
 
   @Override
@@ -94,6 +103,7 @@ public class NetDemoActivity extends AppCompatActivity {
 
   void onSignOutClick() {
     if (vinliApp != null && !isFinishing()) {
+      stopStream();
       signIn();
     }
   }
@@ -104,7 +114,7 @@ public class NetDemoActivity extends AppCompatActivity {
    */
   private void loadApp(Intent intent) {
     if (vinliApp == null) {
-      vinliApp = intent == null
+      vinliApp = (intent == null)
           ? Vinli.loadApp(this)
           : Vinli.initApp(this, intent);
       if (vinliApp == null) {
@@ -131,8 +141,8 @@ public class NetDemoActivity extends AppCompatActivity {
     vinliApp = null;
     killAllCookies();
     Vinli.signIn(this,
-        getString(R.string.app_client_id),
-        getString(R.string.app_redirect_uri),
+        getString(R.string.app_client_id), // Get your app id from dev.vin.li
+        getString(R.string.app_redirect_uri), // Set your app redirect uri at dev.vin.li
         PendingIntent.getActivity(this, 0, new Intent(this, NetDemoActivity.class), 0));
   }
 
@@ -140,7 +150,13 @@ public class NetDemoActivity extends AppCompatActivity {
   private void setupContent() {
     if (contentBound) return;
     setContentView(R.layout.activity_main);
-    ButterKnife.bind(this);
+
+    firstName = (TextView) findViewById(R.id.first_name);
+    lastName = (TextView) findViewById(R.id.last_name);
+    email = (TextView) findViewById(R.id.email);
+    phone = (TextView) findViewById(R.id.phone);
+    deviceContainer = (LinearLayout) findViewById(R.id.device_container);
+
     contentBound = true;
   }
 
@@ -152,7 +168,7 @@ public class NetDemoActivity extends AppCompatActivity {
     // Sanity check.
     if (vinliApp == null || !contentBound) return;
 
-    // Gen composite subscription to hold all individual subscriptions to data.
+    // Generic composite subscription to hold all individual subscriptions to data.
     subscription = new CompositeSubscription();
 
     // Remove all views from device container - best practice would be to use an AdapterView for
@@ -160,12 +176,9 @@ public class NetDemoActivity extends AppCompatActivity {
     // do it this way.
     deviceContainer.removeAllViews();
 
-    // rx tip - use ConnectableObservables to minimize the number of network calls we need to make.
-    // This allows each Observable that depends on User to take its data from the same source
-    // rather than making unnecessary extra User lookups each time.
-    ConnectableObservable<User> userObservable = vinliApp.currentUser().publish();
-
-    subscription.add(userObservable.observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<User>() {
+    subscription.add(vinliApp.currentUser() // Fetch the current signed in user
+        .observeOn(AndroidSchedulers.mainThread()) // Call onCompleted/onError/onNext on the main/UI thread
+        .subscribe(new Subscriber<User>() {
       @Override
       public void onCompleted() {
 
@@ -187,20 +200,20 @@ public class NetDemoActivity extends AppCompatActivity {
 
     // Loop through each of the user's devices...
     subscription.add(vinliApp.devices()
-        .flatMap(Page.<Device>allItems())
-        .observeOn(AndroidSchedulers.mainThread())
+        .flatMap(Page.<Device>allItems()) // Get all devices from all pages
+        .observeOn(AndroidSchedulers.mainThread()) // Run the onCompleted/onError/onNext on Android's main/UI thread
         .subscribe(new Subscriber<Device>() {
           @Override
-          public void onCompleted() {
+          public void onCompleted() { // Called after we have finished fetching all devices.
           }
 
           @Override
-          public void onError(Throwable e) {
+          public void onError(Throwable e) { // Called if something goes wrong fetching devices.
             Log.e(TAG, "Error fetching devices: " + e.getMessage());
           }
 
           @Override
-          public void onNext(Device device) {
+          public void onNext(Device device) { // Called for each device that we fetch.
             // Inflate device layout into device container. See above note about how using an
             // AdapterView would be better if this weren't just a naive example.
             View v = LayoutInflater.from(NetDemoActivity.this).inflate(R.layout.device_layout, deviceContainer, false);
@@ -221,25 +234,29 @@ public class NetDemoActivity extends AppCompatActivity {
 
             setStyledText(getString(R.string.device_name), (device.name() != null) ? device.name() : getString(R.string.unnamed_device), deviceName);
 
-            subscription.add(device.latestVehicle().observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<Vehicle>() {
-              @Override
-              public void onCompleted() {
+            subscription.add(device.latestVehicle() // Get the latest vehicle for this device
+                .observeOn(AndroidSchedulers.mainThread()) // Run the onCompleted/onError/onNext on Android's main/UI thread
+                .subscribe(new Subscriber<Vehicle>() {
+                  @Override
+                  public void onCompleted() {
 
-              }
+                  }
 
-              @Override
-              public void onError(Throwable e) {
-                Log.e(TAG, "Error fetching latest vehicle: " + e.getMessage());
-              }
+                  @Override
+                  public void onError(Throwable e) {
+                    Log.e(TAG, "Error fetching latest vehicle: " + e.getMessage());
+                  }
 
-              @Override
-              public void onNext(Vehicle vehicle) {
-                String vehicleStr = (vehicle != null) ? vehicle.vin() : getString(R.string.none);
-                setStyledText(getString(R.string.latest_vehicle), vehicleStr, latestVehicle);
-              }
-            }));
+                  @Override
+                  public void onNext(Vehicle vehicle) {
+                    String vehicleStr = (vehicle != null) ? vehicle.vin() : getString(R.string.none);
+                    setStyledText(getString(R.string.latest_vehicle), vehicleStr, latestVehicle);
+                  }
+                }));
 
-            subscription.add(device.latestlocation().observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<Location>() {
+            subscription.add(device.latestlocation() // Get the latest location for this device.
+                .observeOn(AndroidSchedulers.mainThread()) // Run the onCompleted/onError/onNext on Android's main/UI thread.
+                .subscribe(new Subscriber<Location>() {
               @Override
               public void onCompleted() {
 
@@ -258,9 +275,6 @@ public class NetDemoActivity extends AppCompatActivity {
             }));
           }
         }));
-
-    // Don't forget to connect the ConnectableObservable, or nothing will happen!
-    subscription.add(userObservable.connect());
   }
 
   /** Unsubscribe all. Need to call this to clean up rx resources. */
@@ -268,6 +282,11 @@ public class NetDemoActivity extends AppCompatActivity {
     if (subscription != null) {
       if (!subscription.isUnsubscribed()) subscription.unsubscribe();
       subscription = null;
+    }
+
+    if(streamSubscription != null){
+      if(!streamSubscription.isUnsubscribed()) streamSubscription.unsubscribe();
+      streamSubscription = null;
     }
   }
 
@@ -290,6 +309,47 @@ public class NetDemoActivity extends AppCompatActivity {
   }
 
   private void streamButtonPressed(Button button){
-    Log.e(TAG, "Button pressed");
+    Device device = (Device) button.getTag();
+
+    // Lets only be streaming one device at a time, so kill the other stream off if it already exists.
+    stopStream();
+
+    // Start the stream from the device object
+    Log.i(TAG, "Starting stream for device: " + device.id());
+    streamSubscription = device.stream() // Create the stream for this device.
+        .observeOn(AndroidSchedulers.mainThread()) // Call onCompleted/onError/onNext on Android's main/UI thread.
+        .subscribe(new Subscriber<StreamMessage>() { // To stop the stream, call streamSubscription.unsubscribe();
+          @Override
+          public void onCompleted() {
+
+          }
+
+          @Override
+          public void onError(Throwable e) {
+            Log.e(TAG, "Error getting messages from stream: " + e.getMessage());
+          }
+
+          @Override
+          public void onNext(StreamMessage streamMessage) {
+            // Grab the RPM value from the StreamMessage, if RPM is not in the message it return DEFAULT_VALUE
+            int rpm = streamMessage.intVal(StreamMessage.DataType.RPM, DEFAULT_VALUE);
+            if (rpm != DEFAULT_VALUE) {
+              Log.i(TAG, "Rpm: " + rpm);
+            }
+
+            // Get the current location of the device from the stream. It defaults to null if its not in the message.
+            Coordinate coord = streamMessage.coord();
+            if (coord != null) {
+              Log.i(TAG, String.format("Latitude: %f Longitude %f", coord.lat(), coord.lon()));
+            }
+          }
+        });
+  }
+
+  private void stopStream(){
+    // Unsubscribe to stop the stream.
+    if(streamSubscription != null && !streamSubscription.isUnsubscribed()){
+      streamSubscription.unsubscribe();
+    }
   }
 }
