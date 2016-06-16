@@ -3,9 +3,6 @@
 
   <string name="app_name">Vinli Net Demo</string>
 
-  <string name="app_client_id">1dbac1be-0092-4d9f-b80e-b69469dc622a</string>
-  <string name="app_redirect_uri">https://android.netdemo.vin.li</string>
-
   <string name="first_name">First Name</string>
   <string name="last_name">Last Name</string>
   <string name="email">Email</string>
@@ -15,16 +12,13 @@
   <string name="first_device">First Device</string>
   <string name="latest_vehicle">Latest Vehicle</string>
   <string name="latest_location">Latest Location</string>
+  <string name="stream_button">Stream</string>
 
-  <string name="error_fmt">%s : Error</string>
-  <string name="success_fmt">%1$s : %2$s</string>
+  <string name="success_fmt"><![CDATA[<b>%1$s :</b> %2$s]]></string>
   <string name="none">None</string>
   <string name="unnamed_vehicle">Unnamed Vehicle</string>
-  <string name="waiting_fmt">%s : --</string>
+  <string name="unnamed_device">Unnamed Device</string>
 
   <string name="sign_out">Sign Out</string>
-  <string name="refresh">Refresh</string>
-
-  <string name="error_getting_devices">Error getting devices.</string>
 
 </resources>
