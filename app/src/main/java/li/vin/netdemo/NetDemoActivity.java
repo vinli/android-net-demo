@@ -16,6 +16,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import li.vin.net.Coordinate;
 import li.vin.net.Device;
 import li.vin.net.Location;
@@ -314,9 +316,14 @@ public class NetDemoActivity extends AppCompatActivity {
     // Lets only be streaming one device at a time, so kill the other stream off if it already exists.
     stopStream();
 
+    // Create an array of ParametricFilter.Seeds to setup the stream with.
+    ArrayList<StreamMessage.ParametricFilter.Seed> filterList = new ArrayList<>();
+    // We only want to see StreamMessages that contain `rpm` in its data.
+    filterList.add(StreamMessage.ParametricFilter.create().deviceId(device.id()).parameter("rpm").build());
+
     // Start the stream from the device object
     Log.i(TAG, "Starting stream for device: " + device.id());
-    streamSubscription = device.stream() // Create the stream for this device.
+    streamSubscription = device.stream(filterList, null) // Create the stream for this device.
         .observeOn(AndroidSchedulers.mainThread()) // Call onCompleted/onError/onNext on Android's main/UI thread.
         .subscribe(new Subscriber<StreamMessage>() { // To stop the stream, call streamSubscription.unsubscribe();
           @Override
@@ -331,16 +338,19 @@ public class NetDemoActivity extends AppCompatActivity {
 
           @Override
           public void onNext(StreamMessage streamMessage) {
-            // Grab the RPM value from the StreamMessage, if RPM is not in the message it return DEFAULT_VALUE
-            int rpm = streamMessage.intVal(StreamMessage.DataType.RPM, DEFAULT_VALUE);
-            if (rpm != DEFAULT_VALUE) {
-              Log.i(TAG, "Rpm: " + rpm);
-            }
+            // We only want to look at publish messages from the stream. We don't want to see acks, filters, heartbeats, etc
+            if(streamMessage.getType() != null && streamMessage.getType().equals("pub")){
+              // Grab the RPM value from the StreamMessage, if RPM is not in the message it return DEFAULT_VALUE
+              int rpm = streamMessage.intVal(StreamMessage.DataType.RPM, DEFAULT_VALUE);
+              if (rpm != DEFAULT_VALUE) {
+                Log.i(TAG, "Rpm: " + rpm);
+              }
 
-            // Get the current location of the device from the stream. It defaults to null if its not in the message.
-            Coordinate coord = streamMessage.coord();
-            if (coord != null) {
-              Log.i(TAG, String.format("Latitude: %f Longitude %f", coord.lat(), coord.lon()));
+              // Get the current location of the device from the stream. It defaults to null if its not in the message.
+              Coordinate coord = streamMessage.coord();
+              if (coord != null) {
+                Log.i(TAG, String.format("Latitude: %f Longitude %f", coord.lat(), coord.lon()));
+              }
             }
           }
         });
